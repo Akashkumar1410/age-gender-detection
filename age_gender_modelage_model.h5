@@ -1,0 +1,48 @@
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+from sklearn.model_selection import train_test_split
+
+# Generate synthetic age data (for demonstration)
+num_samples = 1000
+image_height, image_width = 64, 64
+
+images = np.random.rand(num_samples, image_height, image_width, 3)  # Replace with your image data
+ages = np.random.randint(0, 100, size=num_samples)  # Replace with your age labels
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(images, ages, test_size=0.2, random_state=42)
+
+# Create a simple convolutional neural network (CNN) model
+input_shape = (image_height, image_width, 3)
+
+model = tf.keras.Sequential([
+    Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
+    MaxPooling2D(2, 2),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPooling2D(2, 2),
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dropout(0.5),
+    Dense(1)  # Output layer for age prediction
+])
+
+# Compile the model
+model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error', metrics=['mae'])
+
+# Train the model
+batch_size = 32
+epochs = 10
+
+model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_test, y_test))
+
+# Evaluate the model
+loss, mae = model.evaluate(X_test, y_test)
+print(f'Test MAE: {mae}')
+
+# Make age predictions for new images (replace 'new_image' with your image data)
+new_image = np.random.rand(1, image_height, image_width, 3)
+predicted_age = model.predict(new_image)
+print(f'Predicted Age: {predicted_age[0][0]} years')
